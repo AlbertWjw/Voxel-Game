@@ -18,6 +18,7 @@ public class sceneManager : MonoBehaviour
             obj.transform.parent = this.transform;
             obj.transform.localScale = new Vector3(2, 2, 2);
             obj.transform.position = new Vector3(Random.Range(-100, 100), 1, Random.Range(-100, 100));
+            obj.gameObject.AddComponent<BoxCollider>();
         }
 
         // 随机可拾取物体代替球生成
@@ -31,6 +32,7 @@ public class sceneManager : MonoBehaviour
             obj.GetComponent<MeshRenderer>().material.SetColor("_Diffuse",new Color(Random.Range(0,2), Random.Range(0, 2), Random.Range(0, 2), 1));
             obj.GetComponent<MeshRenderer>().material.SetFloat("_OutlineFactor",0);
             obj.transform.position = new Vector3(Random.Range(-100, 100), 0.15f, Random.Range(-100, 100));
+            obj.gameObject.AddComponent<SphereCollider>();
             obj.gameObject.AddComponent<sphereController>();
         }
     }

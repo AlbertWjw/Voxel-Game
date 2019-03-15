@@ -20,4 +20,5 @@ public class cameraController : MonoBehaviour
             Camera.main.transform.localRotation *= Quaternion.Euler(-mouseY, 0, 0);// 鼠标在Y轴上的移动号转为摄像机的上下运动，即是绕着X轴反向旋转
         }
     }
+
 }
