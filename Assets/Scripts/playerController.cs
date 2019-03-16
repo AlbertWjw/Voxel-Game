@@ -15,6 +15,8 @@ public class playerController : MonoBehaviour
     private Transform thisTransform;  // 当前物体transform组件
     private Animator animator;  // 当前物体的animator组件
 
+    private float moY; // 角色抬枪旋转增加量
+
     // Start is called before the first frame update
     void Start() {
         Debug.Log("Start");
@@ -103,16 +105,12 @@ public class playerController : MonoBehaviour
 
     }
 
-    void LateUpdate()
-    {
-        // 摄像机跟随鼠标上下旋转
-        if (isFollow)
-        {
+    void LateUpdate () {
+        // 角色跟随鼠标上下抬头低头
+        if (isFollow) {
             float mouseY = Input.GetAxis("Mouse Y");  // 获得鼠标当前位置的Y
-            Debug.Log(mouseY);
-            playerBody.transform.localRotation *= Quaternion.Euler(100 * mouseY, 0, 0);
-            playerBody.transform.localRotation = new Quaternion(Camera.main.transform.localRotation.x, playerBody.transform.localRotation.y, playerBody.transform.localRotation.z, playerBody.transform.localRotation.w);
-            //playerBody.transform.localEulerAngles = new Vector3(mouseY, 0, 0);
+            moY += mouseY;
+            playerBody.transform.Rotate(new Vector3(moY, 0, 0), Space.Self);
         }
     }
 
