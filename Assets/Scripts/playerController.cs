@@ -10,7 +10,7 @@ public class playerController : MonoBehaviour
     public float jumpHeight = 3;  // 跳跃高度
     public static bool isFollow = true;  // 是否开启相机跟随鼠标
     public int pickupScope = 5;  // 拾取范围
-    public GameObject playerBody;  // 要旋转的骨骼
+    public GameObject playerBody;  // 要旋转（弯腰）的骨骼
 
     private Transform thisTransform;  // 当前物体transform组件
     private Animator animator;  // 当前物体的animator组件
@@ -39,7 +39,7 @@ public class playerController : MonoBehaviour
         // 鼠标射线检测
         Ray ray;
         RaycastHit hit;
-        GameObject obj;
+        GameObject obj = null;
         ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         if (Physics.Raycast(ray, out hit)) {
             // Debug.Log(hit.collider.gameObject.name);
@@ -51,10 +51,15 @@ public class playerController : MonoBehaviour
         }
 
         // F键按下拾取物品动画，一定范围内
-        if ((Input.GetKeyDown(KeyCode.F)))
-        {
-            if(hit.collider.gameObject.name == "Sphere" && distance(hit.collider.gameObject.transform.position,this.transform.position)<= pickupScope)
-            animator.SetTrigger("pickup");  // 将人物的动画改为拾取状态
+        if (Input.GetKeyDown(KeyCode.F)) {
+            if (obj && obj.name == "Sphere" && distance(obj.transform.position, transform.position) <= pickupScope) {
+                animator.SetTrigger("pickup");  // 将人物的动画改为拾取状态
+                Item item = new Item(obj.GetComponents<sphereController>()[0].itemId, "物品1", 1);// 拾取到的物品的物品id
+                backpack.items.Add(item);  // TODO 在背包中添加背拾取物，之后应该改成同种物体在达到物品上线前合并为一项
+                // 销毁可拾取物
+                Destroy(obj);
+            }
+
         }
         // WSAD移动动画
         if ((Input.GetKey(KeyCode.W)) || (Input.GetKey(KeyCode.S)) || (Input.GetKey(KeyCode.A)) || (Input.GetKey(KeyCode.D))) {
@@ -74,6 +79,7 @@ public class playerController : MonoBehaviour
             animator.SetBool("isGun", false); 
         }
         // 鼠标左键按下开枪动画
+        // TODO 在非持枪状态下，不可开枪，之后需要添加修复
         if ((Input.GetKeyDown(KeyCode.Mouse0)))
         {
             animator.SetBool("shoot",true);  // 将人物的动画改为射击状态
@@ -85,7 +91,9 @@ public class playerController : MonoBehaviour
         }
 
         // 空格键跳跃动画
-        if ((Input.GetKeyDown(KeyCode.Space)))  // TODO 之后需要添加一个角色触碰地面（支撑物）的判断
+        // TODO 1、之后需要添加一个角色触碰地面（支撑物）的判断
+        //      2、让跳跃动作顺畅
+        if ((Input.GetKeyDown(KeyCode.Space)))  
         {
             animator.SetTrigger("jump");  // 将人物的动画改为射击状态
             thisTransform.Translate(0, jumpHeight, 0);
@@ -107,6 +115,7 @@ public class playerController : MonoBehaviour
 
     void LateUpdate () {
         // 角色跟随鼠标上下抬头低头
+        // TODO 拾取物品时动画弯腰和视角的弯腰叠加了，之后需要修改
         if (isFollow) {
             float mouseY = Input.GetAxis("Mouse Y");  // 获得鼠标当前位置的Y
             moY += mouseY;

@@ -2,14 +2,21 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
+/// <summary>
+/// 模拟掉落物
+/// </summary>
 public class sphereController : MonoBehaviour
 {
-    private float outlineTime = 0;
-    private Material material;
-    // Start is called before the first frame update
+    public int itemId = 0;  // 可拾取物的物品id
+
+    private float outlineTime = 0;  // 描边开启时间
+    private Material material;  // 当前物体的材质球
+
     void Start()
     {
         material = GetComponent<MeshRenderer>().material;
+        itemId = Random.Range(1, 11);  // 模拟；生成拾取物品的物品id
     }
 
     // Update is called once per frame

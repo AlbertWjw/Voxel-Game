@@ -60,12 +60,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\Scripts\backpack.cs" />
     <Compile Include="Assets\Scripts\bulletController.cs" />
     <Compile Include="Assets\Scripts\cameraController.cs" />
     <Compile Include="Assets\Scripts\gunController.cs" />
     <Compile Include="Assets\Scripts\playerController.cs" />
     <Compile Include="Assets\Scripts\sceneManager.cs" />
     <Compile Include="Assets\Scripts\sphereController.cs" />
+    <Compile Include="Assets\Scripts\UIController.cs" />
     <None Include="Assets\ObjectOutline.shader" />
     <Reference Include="Unity.TextMeshPro.Editor">
       <HintPath>C:/Other/Unity/V Map Project/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>

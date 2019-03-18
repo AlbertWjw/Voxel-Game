@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class gunController : MonoBehaviour
 {
@@ -17,7 +18,7 @@ public class gunController : MonoBehaviour
     void Update()
     {
         // 鼠标左键按下开枪动画
-        if ((Input.GetKeyDown(KeyCode.Mouse0)))
+        if ((Input.GetKeyDown(KeyCode.Mouse0)) && !EventSystem.current.IsPointerOverGameObject())
         {
             Instantiate(bullet, transform.Find("muzzle").position, transform.Find("muzzle").rotation);
         }
