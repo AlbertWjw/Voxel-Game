@@ -63,7 +63,9 @@
     <Compile Include="Assets\Scripts\backpack.cs" />
     <Compile Include="Assets\Scripts\bulletController.cs" />
     <Compile Include="Assets\Scripts\cameraController.cs" />
+    <Compile Include="Assets\Scripts\enemyController.cs" />
     <Compile Include="Assets\Scripts\gunController.cs" />
+    <Compile Include="Assets\Scripts\itemController.cs" />
     <Compile Include="Assets\Scripts\playerController.cs" />
     <Compile Include="Assets\Scripts\sceneManager.cs" />
     <Compile Include="Assets\Scripts\sphereController.cs" />

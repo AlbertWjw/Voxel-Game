@@ -8,18 +8,20 @@ using UnityEngine;
 public class sceneManager : MonoBehaviour
 {
     public Material material;
-    // Start is called before the first frame update
+    public GameObject enemy;
+    public GameObject player;
+
     void Start()
     {
-        // 随机掩体生成
-        int random = Random.Range(0, 100);
-        for (int i = 0; i < random; i++) {
-            GameObject obj = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            obj.transform.parent = this.transform;
-            obj.transform.localScale = new Vector3(2, 2, 2);
-            obj.transform.position = new Vector3(Random.Range(-100, 100), 1, Random.Range(-100, 100));
-            obj.gameObject.AddComponent<BoxCollider>();
-        }
+        //// 随机掩体生成
+        //int random = Random.Range(0, 100);
+        //for (int i = 0; i < random; i++) {
+        //    GameObject obj = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        //    obj.transform.parent = this.transform;
+        //    obj.transform.localScale = new Vector3(2, 2, 2);
+        //    obj.transform.position = new Vector3(Random.Range(-100, 100), 1, Random.Range(-100, 100));
+        //    obj.gameObject.AddComponent<BoxCollider>();
+        //}
 
         // 随机可拾取物体代替球生成
         int ball = Random.Range(100, 1000);
@@ -34,6 +36,15 @@ public class sceneManager : MonoBehaviour
             obj.transform.position = new Vector3(Random.Range(-100, 100), 0.15f, Random.Range(-100, 100));
             obj.gameObject.AddComponent<SphereCollider>();
             obj.gameObject.AddComponent<sphereController>();
+        }
+
+        // 随机敌人生成
+        int num = Random.Range(0, 100);  // 生成数量
+        for (int i = 0; i < num; i++)
+        {
+            GameObject obj = Instantiate(enemy,transform);
+            obj.transform.position = new Vector3(Random.Range(-100, 100), 1, Random.Range(-100, 100));
+            obj.GetComponent<enemyController>().player = player;
         }
     }
 

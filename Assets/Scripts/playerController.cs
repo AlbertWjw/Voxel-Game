@@ -4,6 +4,13 @@ using UnityEngine;
 
 public class playerController : MonoBehaviour
 {
+    public UIController gameUI;  // 游戏UI脚本
+    public backpack playerBackpack;  // 游戏UI脚本
+    public GameObject hurtParticle;  // 受到伤害出血效果
+
+    public int maxHP = 100;  // 最大hp
+    public int hp = 100;  // 当前hp
+
     public float vMoveSpeed = 10.0F;  // 前后移动速度
     public float hMoveSpeed = 5.0F;  // 左右移动速度
     public float rotateSpeed = 5.0F;  // 左右旋转速度
@@ -14,14 +21,18 @@ public class playerController : MonoBehaviour
 
     private Transform thisTransform;  // 当前物体transform组件
     private Animator animator;  // 当前物体的animator组件
+    private BoxCollider trigger;  // 当前物体的脚踩触发器组件
 
     private float moY; // 角色抬枪旋转增加量
+
+    public bool isTrigger  = true;  // 是否触发脚踩触发器
 
     // Start is called before the first frame update
     void Start() {
         Debug.Log("Start");
         thisTransform = this.transform;
         animator = thisTransform.GetComponent<Animator>();
+        trigger = thisTransform.GetComponent<BoxCollider>();
         Cursor.lockState = CursorLockMode.Locked;  // 默认设置鼠标隐藏
     }
 
@@ -30,10 +41,17 @@ public class playerController : MonoBehaviour
         // 波浪线~键开启/关闭相机跟随鼠标，隐藏鼠标
         if (Input.GetKeyDown(KeyCode.BackQuote)){
             isFollow = !isFollow;
-            if(isFollow)
-                Cursor.lockState = CursorLockMode.Locked;
-            else
-                Cursor.lockState = CursorLockMode.None;
+        }
+        if (isFollow)
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
+
+        else
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
         }
 
         // 鼠标射线检测
@@ -54,10 +72,12 @@ public class playerController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.F)) {
             if (obj && obj.name == "Sphere" && distance(obj.transform.position, transform.position) <= pickupScope) {
                 animator.SetTrigger("pickup");  // 将人物的动画改为拾取状态
-                Item item = new Item(obj.GetComponents<sphereController>()[0].itemId, "物品1", 1);// 拾取到的物品的物品id
-                backpack.items.Add(item);  // TODO 在背包中添加背拾取物，之后应该改成同种物体在达到物品上线前合并为一项
+                Item item = new Item(obj.GetComponents<sphereController>()[0].itemId, "物品"+ obj.GetComponents<sphereController>()[0].itemId, 1);//TODO 拾取到的物品的物品id
+                playerBackpack.addItem(item);  // 在背包中添加背拾取物
+                bool isTrue = gameUI.updateBackpack(item);
                 // 销毁可拾取物
-                Destroy(obj);
+                if(isTrue)
+                    Destroy(obj);
             }
 
         }
@@ -69,7 +89,7 @@ public class playerController : MonoBehaviour
             animator.SetBool("walk", false);  // 取消人物移动动画
         }
 
-        // Q按下/抬起 开/关持枪动画
+        // TODO临时 Q按下/抬起 开/关持枪动画
         if ((Input.GetKeyDown(KeyCode.Q)))
         {
             animator.SetBool("isGun", true);  
@@ -79,8 +99,7 @@ public class playerController : MonoBehaviour
             animator.SetBool("isGun", false); 
         }
         // 鼠标左键按下开枪动画
-        // TODO 在非持枪状态下，不可开枪，之后需要添加修复
-        if ((Input.GetKeyDown(KeyCode.Mouse0)))
+        if ((Input.GetKeyDown(KeyCode.Mouse0)) && animator.GetBool("isGun"))
         {
             animator.SetBool("shoot",true);  // 将人物的动画改为射击状态
         }
@@ -92,11 +111,10 @@ public class playerController : MonoBehaviour
 
         // 空格键跳跃动画
         // TODO 1、之后需要添加一个角色触碰地面（支撑物）的判断
-        //      2、让跳跃动作顺畅
-        if ((Input.GetKeyDown(KeyCode.Space)))  
+        if (Input.GetKeyDown(KeyCode.Space) && isTrigger)  
         {
             animator.SetTrigger("jump");  // 将人物的动画改为射击状态
-            thisTransform.Translate(0, jumpHeight, 0);
+            gameObject.GetComponent<Rigidbody>().velocity += Vector3.up*jumpHeight;
         }
 
         // 移动
@@ -123,10 +141,30 @@ public class playerController : MonoBehaviour
         }
     }
 
+    void OnTriggerEnter(Collider collider)  // 当进入触发器
+    {
+        isTrigger = true;
+    }
+    void OnTriggerExit(Collider collider)  // 当退出触发器
+    {
+        isTrigger = false;
+    }
+
     // 计算两点间的距离
-    double distance(Vector3 v1,Vector3 v2) {
+    private double distance(Vector3 v1,Vector3 v2) {
         double num=0;
         num = System.Math.Sqrt((v1.x - v2.x) * (v1.x - v2.x) + (v1.z - v2.z) * (v1.z - v2.z));
         return num;
+    }
+
+    // TODO 伤害扣除
+    public void hurt(int num)
+    {
+        GameObject go = Instantiate(hurtParticle, transform.position, transform.rotation);
+        hp -= num;
+        if (hp <= 0)
+        {
+            Debug.Log("Player Dead");
+        }
     }
 }

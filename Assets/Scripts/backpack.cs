@@ -8,7 +8,7 @@ using UnityEngine;
 /// </summary>
 public class backpack : MonoBehaviour
 {
-    public static int[][] weapon;
+    public static Weapon[] weapons;
 
     public static List<Item> items;
 
@@ -22,6 +22,29 @@ public class backpack : MonoBehaviour
     void Update()
     {
         
+    }
+
+    public void addItem(Item item) {
+        Item last = null;
+        items.Find(i => {
+            if (i.ID == item.ID) {
+                last = i;
+                items.Remove(i);
+            }
+            return true;
+                
+        });
+        if (last != null)
+        {
+            last.Count++;
+        }
+        else {
+            last = item;
+        }
+        items.Add(last);
+        foreach (Item i in items) {
+            Debug.Log(i.ID + "," + i.Title + "," + i.Count);
+        }
     }
 }
 
@@ -37,5 +60,14 @@ public class Item {
         this.ID = id;
         this.Title = title;
         this.Count = count;
+    }
+}
+
+/// <summary>
+/// 武器类
+/// </summary>
+public class Weapon : Item {
+    public Weapon(int id, string title, int count):base(id,title,count) {
+
     }
 }
