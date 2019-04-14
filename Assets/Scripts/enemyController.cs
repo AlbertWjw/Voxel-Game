@@ -89,7 +89,7 @@ public class enemyController : MonoBehaviour
                     {
                         Debug.Log("attack hurt");
                         // TODO 攻击
-                        objAttack.transform.parent.GetComponent<playerController>().hurt(Random.Range(20,40));
+                        objAttack.transform.parent.GetComponent<mainPlayer>().hurt(Random.Range(20,40));
                         
                     }
                 }

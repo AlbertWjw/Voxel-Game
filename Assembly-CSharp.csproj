@@ -64,10 +64,13 @@
     <Compile Include="Assets\Scripts\bulletController.cs" />
     <Compile Include="Assets\Scripts\cameraController.cs" />
     <Compile Include="Assets\Scripts\enemyController.cs" />
-    <Compile Include="Assets\Scripts\gunController.cs" />
+    <Compile Include="Assets\Scripts\EventManager.cs" />
+    <Compile Include="Assets\Scripts\GunController.cs" />
     <Compile Include="Assets\Scripts\itemController.cs" />
-    <Compile Include="Assets\Scripts\playerController.cs" />
+    <Compile Include="Assets\Scripts\mainPlayer.cs" />
+    <Compile Include="Assets\Scripts\OperationManager.cs" />
     <Compile Include="Assets\Scripts\sceneManager.cs" />
+    <Compile Include="Assets\Scripts\SettingManager.cs" />
     <Compile Include="Assets\Scripts\sphereController.cs" />
     <Compile Include="Assets\Scripts\UIController.cs" />
     <None Include="Assets\ObjectOutline.shader" />
