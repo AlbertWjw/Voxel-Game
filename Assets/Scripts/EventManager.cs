@@ -30,15 +30,16 @@ public class EventManager: MonoBehaviour
     public delegate void Operation(params string[] handler);
     private static List<Operation>[] operation;
 
-    //构造函数
-    public void Start() {
-        operation = new List<Operation>[(int)eventEnum.max];
+    public void Awake(){
+        operation = new List<Operation>[(int)eventEnum.max];  // 初始化事件列表
     }
 
     /// <summary>
     /// 事件订阅
     /// </summary>
     public static void AddEvent(Operation handler, params eventEnum[] events) {
+        if (operation == null)
+            operation = new List<Operation>[(int)eventEnum.max];
         for (int i = 0; i < events.Length; i++) {
             //Debug.Log("事件订阅  "+i);
             int key = (int)events[i];
@@ -63,7 +64,7 @@ public class EventManager: MonoBehaviour
     /// 事件派发
     /// </summary>
     public static void SendEvent(eventEnum eventId, params string[] obj) {
-        //Debug.Log("事件派发  "+(int)eventId);
+        // Debug.Log("事件派发  "+(int)eventId);
         if (operation == null || operation[(int)eventId] == null) return;
         for (int i = 0; i < operation[(int)eventId].Count; i++) {
             operation[(int)eventId][i](obj);

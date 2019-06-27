@@ -40,11 +40,14 @@ public class sceneManager : MonoBehaviour
 
         // 随机敌人生成
         int num = Random.Range(0, 100);  // 生成数量
+        //int num = 1;  // 生成数量
         for (int i = 0; i < num; i++)
         {
             GameObject obj = Instantiate(enemy,transform);
             obj.transform.position = new Vector3(Random.Range(-100, 100), 1, Random.Range(-100, 100));
-            obj.GetComponent<enemyController>().player = player;
+            //obj.transform.position = Vector3.zero;
+            obj.GetComponent<NPCControl>().player = player;
+            obj.GetComponent<NPCControl>().defaultPoint = obj.transform.position;
         }
     }
 

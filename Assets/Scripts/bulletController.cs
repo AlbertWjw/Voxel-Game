@@ -26,7 +26,7 @@ public class bulletController : MonoBehaviour
     // 进入触发器
     private void OnTriggerEnter(Collider other)
     {
-        Debug.Log(other.name);
+        // Debug.Log(other.name);
         isTrigger = true;
     }
 

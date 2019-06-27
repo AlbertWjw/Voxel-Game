@@ -1,5 +1,7 @@
 /.vs
 /.vscode
+/Library
+/Temp
 
 # IDE - VSCode
 .vscode/*

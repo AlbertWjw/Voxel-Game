@@ -203,10 +203,17 @@ public class mainPlayer : MonoBehaviour
     public void hurt(int num)
     {
         GameObject go = Instantiate(hurtParticle, transform.position, transform.rotation);
+        StartCoroutine(DestroyEffect(go));
         hp -= num;
+        UIController._uiController.showPlayerHP(hp, maxHP);
         if (hp <= 0)
         {
             Debug.Log("Player Dead");
         }
+    }
+
+    IEnumerator DestroyEffect(GameObject go) {
+        yield return new WaitForSeconds(2);
+        Destroy(go);
     }
 }

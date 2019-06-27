@@ -8,6 +8,7 @@ using UnityEngine.UI;
 /// </summary>
 public class UIController : MonoBehaviour
 {
+    public static UIController _uiController;
     public GameObject mainUI;  // 主UI
     public GameObject backpack;  // 背包页UI
     public GameObject items;  // 背包物品列表UI
@@ -17,10 +18,21 @@ public class UIController : MonoBehaviour
     public GameObject settingPrefab;  // 设置UIPrefab
     public GameObject bagPrefab;  // 背包UIPrefab
 
+    public GameObject newWeapon;  // 当前武器
+    public Text newWeaponNum;  // 当前武器弹药数量
+
+    public Slider hpSlider;  // 当前hp
+
     void Start()
     {
         EventManager.AddEvent(UIShow, eventEnum.UIShow);
         EventManager.AddEvent(UIHide, eventEnum.UIHide);
+
+        _uiController = this;
+
+        newWeapon = mainUI.transform.Find("weapons/weapon1").gameObject;
+        newWeaponNum = newWeapon.transform.Find("Text").gameObject.GetComponent<Text>();
+        hpSlider = mainUI.transform.Find("Panel/hp").gameObject.GetComponent<Slider>();
     }
 
     void Update() {
@@ -88,5 +100,23 @@ public class UIController : MonoBehaviour
                 isShowSettingUI = false;
             }
         }
+    }
+
+    /// <summary>
+    /// 刷新当前武器子弹数量
+    /// </summary>
+    /// <param name="num"></param>
+    public void ShowBulletNum(string num) {
+        if (newWeaponNum != null) {
+            newWeaponNum.text = num;
+        }
+    }
+
+    /// <summary>
+    /// 刷新玩家hp
+    /// </summary>
+    public void showPlayerHP(int hp, int maxHp) {
+        if(hpSlider)
+            hpSlider.value = (float)hp/maxHp;
     }
 }

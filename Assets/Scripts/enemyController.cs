@@ -79,9 +79,9 @@ public class enemyController : MonoBehaviour
                 Debug.DrawRay(transform.Find("weapon").transform.position, player.transform.position + new Vector3(v, h, 0) - transform.Find("weapon").transform.position, Color.red);
                 if (Physics.Raycast(rayAttack, out hitAttack))
                 {
-                    Debug.Log(hit.collider.gameObject.name);
+                    // Debug.Log(hit.collider.gameObject.name);
                     objAttack = hitAttack.collider.gameObject;
-                    Debug.Log(objAttack.tag);
+                    // Debug.Log(objAttack.tag);
 
                     GameObject go = Instantiate(firt, transform.Find("weapon").transform.position, transform.transform.rotation);
                     lastAttackTime = Time.time;
