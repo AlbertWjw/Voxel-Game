@@ -62,6 +62,7 @@
   <ItemGroup>
     <Compile Include="Assets\Scripts\backpack.cs" />
     <Compile Include="Assets\Scripts\bulletController.cs" />
+    <Compile Include="Assets\Scripts\ByteArray.cs" />
     <Compile Include="Assets\Scripts\cameraController.cs" />
     <Compile Include="Assets\Scripts\enemyController.cs" />
     <Compile Include="Assets\Scripts\Env\Config.cs" />
@@ -73,12 +74,19 @@
     <Compile Include="Assets\Scripts\mainPlayer.cs" />
     <Compile Include="Assets\Scripts\MainUI.cs" />
     <Compile Include="Assets\Scripts\ModelShow.cs" />
+    <Compile Include="Assets\Scripts\NetDispose.cs" />
+    <Compile Include="Assets\Scripts\NetEvent.cs" />
+    <Compile Include="Assets\Scripts\NetManager.cs" />
     <Compile Include="Assets\Scripts\NPCControl.cs" />
     <Compile Include="Assets\Scripts\OperationManager.cs" />
+    <Compile Include="Assets\Scripts\Proto\BaseProto.cs" />
+    <Compile Include="Assets\Scripts\Proto\MoveProto.cs" />
     <Compile Include="Assets\Scripts\sceneManager.cs" />
     <Compile Include="Assets\Scripts\SettingManager.cs" />
     <Compile Include="Assets\Scripts\sphereController.cs" />
+    <Compile Include="Assets\Scripts\Tool.cs" />
     <Compile Include="Assets\Scripts\UIController.cs" />
+    <Compile Include="Assets\Scripts\UILog.cs" />
     <Compile Include="Assets\Scripts\UIOnDrag.cs" />
     <None Include="Assets\ObjectOutline.shader" />
     <Reference Include="Unity.TextMeshPro.Editor">

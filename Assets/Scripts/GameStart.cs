@@ -10,9 +10,11 @@ public class GameStart : MonoBehaviour
 {
     public bool isHotUpdate = true;
     public Text stateTextUI;
+    NetManager net = null;
 
     void Start() {
         stateTextUI = GameObject.Find("StateText").GetComponent<Text>();
+        NetEvent.AddEvent(linked, netEventEnum.Linked);
         // 检查存档
         if (Directory.Exists(Config.Instance.localInfoPath)) {
             if (Directory.GetFiles(Config.Instance.localInfoPath).Length > 0) {
@@ -31,14 +33,18 @@ public class GameStart : MonoBehaviour
             } else if (int.Parse(lastVersion[2]) > versionNumber[2]) {
                 stateTextUI.text = "需要热更新";
                 // todo
-                StartCoroutine(UpDateAsset(loadNextScene));  // 热更新
+                StartCoroutine(UpDateAsset(loadedNext));  // 热更新
             } else {
                 print("不需要更新");
                 stateTextUI.text = "不需要更新";
-                loadNextScene();
+                loadedNext();
             }
         }
 
+    }
+
+    void Update() {
+        NetManager.Update();
     }
 
     /// <summary>
@@ -84,8 +90,25 @@ public class GameStart : MonoBehaviour
         }
     }
 
-    public void loadNextScene() {
+    // 加载完成后
+    // 连接服务器
+    public void loadedNext() {
+        stateTextUI.text = "正在连接服务器...";
+        // 网络
+        net = NetManager.Instance;
+        //net.pingPongTime = 3;
+        net.Connect("127.0.0.1", 9003);
+        // SceneManager.LoadScene("Main");
+    }
+
+    public void linked(params object[] args) {
         SceneManager.LoadScene("Main");
+    }
+
+    // 销毁
+    private void OnDisable() {
+        NetEvent.DelEvent(linked, netEventEnum.Linked);
+        net.Close();
     }
 
     /// <summary>

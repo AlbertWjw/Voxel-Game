@@ -28,8 +28,11 @@ public class MainUI : MonoBehaviour{
         playerModel.Show(playerTexture, true);
         //playerModel.Clear();
 
+        Text startBtnText = transform.Find("Start/Text").gameObject.GetComponent<Text>();
         startBtn = transform.Find("Start").GetComponent<Button>();
         startBtn.onClick.AddListener(() => {
+            if (startBtnText.text == "Loading") return;
+            startBtnText.text = "Loading";
             SceneManager.LoadScene("Game");
         });
     }
