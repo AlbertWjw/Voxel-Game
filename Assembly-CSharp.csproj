@@ -71,12 +71,15 @@
     <Compile Include="Assets\Scripts\GunController.cs" />
     <Compile Include="Assets\Scripts\itemController.cs" />
     <Compile Include="Assets\Scripts\mainPlayer.cs" />
+    <Compile Include="Assets\Scripts\MainUI.cs" />
+    <Compile Include="Assets\Scripts\ModelShow.cs" />
     <Compile Include="Assets\Scripts\NPCControl.cs" />
     <Compile Include="Assets\Scripts\OperationManager.cs" />
     <Compile Include="Assets\Scripts\sceneManager.cs" />
     <Compile Include="Assets\Scripts\SettingManager.cs" />
     <Compile Include="Assets\Scripts\sphereController.cs" />
     <Compile Include="Assets\Scripts\UIController.cs" />
+    <Compile Include="Assets\Scripts\UIOnDrag.cs" />
     <None Include="Assets\ObjectOutline.shader" />
     <Reference Include="Unity.TextMeshPro.Editor">
       <HintPath>C:/Other/Unity/V Map Project/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>

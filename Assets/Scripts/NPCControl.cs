@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.AI;
 
 [RequireComponent(typeof(Rigidbody))]
@@ -13,6 +14,14 @@ public class NPCControl : MonoBehaviour {
     public int attackTime = 2; // 攻击时间间隔
     public float Speed = 10f;
 
+
+    public GameObject attackScopeGo;
+    public float radius = 2;
+    public float angleDegree = 10;
+    public int segments = 10;
+    private MeshFilter meshFilter;
+
+
     public void SetTransition(Transition t) {
         //该方法用来改变有限状态机的状体，有限状态机基于当前的状态和通过的过渡状态。
         //如果当前的状态没有用来通过的过度状态，则会抛出错误
@@ -25,6 +34,14 @@ public class NPCControl : MonoBehaviour {
 
         defaultPoint = transform.position;
         player = GameObject.FindGameObjectWithTag("Player");
+
+        attackScopeGo = transform.Find("attackScope").gameObject;
+        meshFilter = attackScopeGo.GetComponent<MeshFilter>();
+        if (meshFilter == null) {
+            meshFilter = attackScopeGo.AddComponent<MeshFilter>();
+        }
+        meshFilter.mesh = CreateMesh(angleDegree, radius);
+        attackScopeGo.GetComponent<MeshCollider>().sharedMesh = meshFilter.mesh;
     }
 
     public void FixedUpdate() {
@@ -56,6 +73,38 @@ public class NPCControl : MonoBehaviour {
         fsm.AddState(chase);
         fsm.AddState(attack);
     }
+
+
+    private static Mesh CreateMesh(float angle, float radius) {
+        int[] triangles;
+        Mesh mesh = new Mesh();
+
+        List<Vector3> vertices = new List<Vector3>();
+        vertices.Add(Vector3.zero);
+        int pointAmount = 100;//点的数目，值越大曲线越平滑  
+        float eachAngle = angle / pointAmount;
+        Vector3 forward = Vector3.forward;
+        for (int i = 1; i < pointAmount - 1; i++) {
+            Vector3 pos = Quaternion.Euler(0f, -angle / 2 + eachAngle * (i - 1), 0f) * forward * radius + Vector3.zero;
+            vertices.Add(pos);
+        }
+
+        int triangleAmount = vertices.Count - 2;
+        triangles = new int[3 * triangleAmount];
+
+        //根据三角形的个数，来计算绘制三角形的顶点顺序（索引）    
+        //顺序必须为顺时针或者逆时针    
+        for (int i = 0; i < triangleAmount; i++) {
+            triangles[3 * i] = 0;//固定第一个点    
+            triangles[3 * i + 1] = i + 1;
+            triangles[3 * i + 2] = i + 2;
+        }
+
+        mesh.vertices = vertices.ToArray();
+        mesh.triangles = triangles;
+
+        return mesh;
+    }
 }
 
 
@@ -79,7 +128,6 @@ public class InspectionState : FSMState {
         Debug.Log("进入inspectionState状态之前执行--------");
         inspectionTime = Time.realtimeSinceStartup;
         angles = Random.Range(0f,1f);
-        Debug.Log("angles:" + angles);
     }
 
     public override void DoBeforeLeaving() {
@@ -90,7 +138,7 @@ public class InspectionState : FSMState {
         RaycastHit hit;
         Debug.DrawRay(npc.transform.position, npc.transform.forward, Color.red);
         if (Vector3.Distance(npc.transform.position, player.transform.position) <= 35f) {
-            Debug.Log("与玩家的距离少于35");
+            //Debug.Log("与玩家的距离少于35");
             if (Physics.Raycast(npc.transform.position, player.transform.position, out hit, 35F) && hit.transform.gameObject.tag == "Player") {
                 Debug.Log("看到玩家 转换状态");
                 npc.GetComponent<NPCControl>().SetTransition(Transition.SawPlayer);
@@ -114,7 +162,6 @@ public class InspectionState : FSMState {
         if (changeAnglesTime!= 0 && Time.realtimeSinceStartup - changeAnglesTime > 5) {
             angles = Random.Range(0f, 1f);
             changeAnglesTime = 0;
-            Debug.Log("angles:" + angles);
         }
 
 
