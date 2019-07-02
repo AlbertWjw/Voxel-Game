@@ -14,7 +14,9 @@ public enum netEventEnum {
     Enter = 11,  // 连接   
     Leave = 12,  // 断连
 
-    List = 23,  // 下发玩家列表
+    GameStart = 20, // 玩家进入游戏场景
+    GetList = 23,  // 请求玩家列表
+    List = 24,  // 下发玩家列表
 
     // 操控
     Move = 101,   // 移动

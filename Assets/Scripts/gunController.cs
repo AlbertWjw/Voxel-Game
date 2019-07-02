@@ -37,7 +37,7 @@ public class GunController : MonoBehaviour
         RaycastHit hit;
         GameObject obj = null;
         Vector2 v = Input.mousePosition;
-        if (!mainPlayer.isFollow)
+        if (!OperationManager.isFollow)
             v = new Vector2(Screen.width / 2, Screen.height / 2); //屏幕中心点
         ray = Camera.main.ScreenPointToRay(v);
         if (Physics.Raycast(ray, out hit))

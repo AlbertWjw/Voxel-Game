@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 /// </summary>
 namespace Net.Proto {
     class MoveProto: BaseProto {
-        public float x = 0; 
-        public float y = 0; 
-        public float z = 0;
+        public int x = 0; 
+        public int y = 0; 
+        public int z = 0;
 
         public MoveProto() {
             Console.WriteLine("移动协议 - 构造函数");
@@ -27,7 +27,6 @@ namespace Net.Proto {
             object[] obj = objList.ToArray();
             return obj;
         }
-
     }
 
     class EnterProto : BaseProto {
@@ -58,6 +57,20 @@ namespace Net.Proto {
 
     }
 
+    class GameStartProto : BaseProto {
+
+        public GameStartProto() {
+            Console.WriteLine("GameStart协议 - 构造函数");
+            protoType = netEventEnum.GameStart;
+        }
+
+        public override object[] returnFun() {
+            object[] objs = new object[1] { id };
+            return objs;
+        }
+
+    }
+
     class ListProto : BaseProto {
 
         public List<string> list = new List<string>();
@@ -75,6 +88,25 @@ namespace Net.Proto {
         }
 
     }
+
+    class GetListProto : BaseProto {
+
+        public List<string> list = new List<string>();
+        //public string list = null;
+
+        public GetListProto() {
+            Console.WriteLine("GetList协议 - 构造函数");
+            protoType = netEventEnum.GetList;
+        }
+
+        public override object[] returnFun() {
+            List<object> objList = list.ConvertAll(s => (object)s);
+            object[] obj = objList.ToArray();
+            return obj;
+        }
+
+    }
+
 
     class PingProto : BaseProto {
 

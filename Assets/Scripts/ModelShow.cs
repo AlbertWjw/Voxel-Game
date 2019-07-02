@@ -11,7 +11,7 @@ public class ModelShow {
     GameObject model;
     int width;
     int height;
-    bool isContinue = false;
+    //bool isContinue = false;
     RawImage image;
 
     public ModelShow(GameObject model, int width, int height) {
@@ -48,7 +48,7 @@ public class ModelShow {
     }
 
     public void Clear() {
-        isContinue = false;
+        //isContinue = false;
         GameObject.Destroy(cameraGo);
         GameObject.Destroy(model);
     }

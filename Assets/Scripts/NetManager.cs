@@ -23,6 +23,7 @@ public class NetManager {
     private static long lastPongTime = 0;  // 上次收到心跳的时间
     private bool isReceive = true;  // 是否接收消息
     private Thread pingThread = null;  // 心跳线程
+    private Timer sendTimer = null;  // 发送消息定时器
     private static ByteArray readbuff = new ByteArray();  // 接收缓冲区
     private bool isPing = false;  // 是否开启心跳
     private static Queue<string> sendMgrQueue = new Queue<string>();  // 发送消息队列
@@ -40,6 +41,8 @@ public class NetManager {
         client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
         IAsyncResult result = null;
         try {
+            UILog.log.Add("尝试连接。。。");
+
             result = client.BeginConnect(ipe, BeginConnectCallback, client);
         } catch (SocketException ex) {
             client.EndConnect(result);
@@ -56,10 +59,11 @@ public class NetManager {
 
         // 消息类型bytes
         byte[] typeBytes = new byte[2];  
-        typeBytes[0] = (byte)(((int)type) % 256);
-        typeBytes[1] = (byte)(((int)type) / 256);
+        typeBytes[0] = (byte)(((int)type) % 255);
+        typeBytes[1] = (byte)(((int)type) / 255);
         // 打印消息类
-        string strr = BitConverter.ToInt16(typeBytes, 0).ToString();
+        string strr = ((Int16)(typeBytes[1] * 255 + typeBytes[0])).ToString();
+        //string strr = BitConverter.ToInt16(typeBytes, 0).ToString();
         //UILog.log.Add("发送消息类型字符串：" + strr);
         //UILog.log.Add("发送消息类型：" + type.ToString());
         // 消息类型字符串
@@ -70,49 +74,85 @@ public class NetManager {
         }
 
         // 发送消息拼装（加入长度）
-        if (client.Connected) {
-            if (sendMgrQueue.Count < 0) return;  // 待发送消息队列中没有消息跳过
-            string msg = sendMgrQueue.Peek();  // 取出待发送消息
+        //if (client.Connected) {
+        //if (sendMgrQueue.Count < 0) return;  // 待发送消息队列中没有消息跳过
+        //string msg = sendMgrQueue.Peek();  // 取出待发送消息
+        //// 消息长度
+        //byte[] sendbytes = Encoding.UTF8.GetBytes(msg);
+        //Int16 mgrLen = (Int16)sendbytes.Length;
+        //byte[] lenBytes = new byte[2];
+        //lenBytes[0] = (byte)(sendbytes.Length % 255);
+        //lenBytes[1] = (byte)(sendbytes.Length / 255);
+        //byte[] sendBytes = lenBytes.Concat(sendbytes).ToArray();  // 发送bytes
+        ////UILog.log.Add("发送："+Encoding.UTF8.GetString(sendbytes));
+        //client.BeginSend(sendBytes, 0, sendBytes.Length, 0, BeginSendCallback, client);
+        //} else {
+        //    UILog.log.Add("与服务器断开");
+        //    Close();
+        //}
+    }
+
+    private void SendMsg() {
+        try {
+            if (sendMgrQueue.Count <= 0) {
+                sendTimer = new Timer((e) => {
+                    SendMsg();
+                    sendTimer.Dispose();
+                }, null, 200, 200);
+                return;
+            }  // 待发送消息队列中没有消息跳过  todo
+            string msg = "";
+            lock (sendMgrQueue) {
+                msg = sendMgrQueue.Peek();  // 取出待发送消息
+            }
             // 消息长度
             byte[] sendbytes = Encoding.UTF8.GetBytes(msg);
             Int16 mgrLen = (Int16)sendbytes.Length;
             byte[] lenBytes = new byte[2];
-            lenBytes[0] = (byte)(sendbytes.Length % 256);
-            lenBytes[1] = (byte)(sendbytes.Length / 256);
+            lenBytes[0] = (byte)(sendbytes.Length % 255);
+            lenBytes[1] = (byte)(sendbytes.Length / 255);
             byte[] sendBytes = lenBytes.Concat(sendbytes).ToArray();  // 发送bytes
-            //UILog.log.Add("发送："+Encoding.UTF8.GetString(sendbytes));
+            //Console.WriteLine("发送：" + Encoding.UTF8.GetString(sendbytes));
             client.BeginSend(sendBytes, 0, sendBytes.Length, 0, BeginSendCallback, client);
-        } else {
-            //UILog.log.Add("与服务器断开");
-            Close();
+        } catch (SocketException ex) {
+            //10061已经找到对方但是被对方拒绝
+            if (ex.NativeErrorCode.Equals(10061)) {
+                // UILog.log.Add(ipe.Address.ToString()+":"+ ipe.Port.ToString());
+                client.BeginConnect(ipe, BeginConnectCallback, client);
+            }
+        } catch (Exception ex) {
+            UILog.log.Add("Exception:" + ex.ToString());
+
         }
     }
-    
+
     // BeginConnect回调
     public void BeginConnectCallback(IAsyncResult ar) {
         try {
             ((Socket)ar.AsyncState).EndConnect(ar);
-            Thread.Sleep(2000);
-            lock (MessageQueue) {
-                MessageQueue.Enqueue(new string[2] { "Linked", null });
-            }
+            UILog.log.Add("连接成功...");
             //开始心跳
             if (isPing) {
                 pingThread = new Thread(Ping);
                 pingThread.Start();
             }
 
+            SendMsg();
             // 开启消息接收
-            //UILog.log.Add("开始接收...");
+            UILog.log.Add("开始接收...");
             client.BeginReceive(readbuff.bytes, readbuff.writeIdx, readbuff.remain, 0, BeginReceiveCallback, client);
         } catch (SocketException ex) {
-            //UILog.log.Add(ex.NativeErrorCode+":"+ex.ToString());
+            UILog.log.Add(ex.NativeErrorCode+":"+ex.ToString());
             // 重连
             //10061已经找到对方但是被对方拒绝
-            if (ex.NativeErrorCode.Equals(10061)) {
-                // UILog.log.Add(ipe.Address.ToString()+":"+ ipe.Port.ToString());
-                client.BeginConnect(ipe, BeginConnectCallback, client);
+            if (ex.NativeErrorCode.Equals(10061) || ex.NativeErrorCode.Equals(10054)) {
+                UILog.log.Add("申请重连。。。");
+                Connect(ipe.Address.ToString(), ipe.Port);
+                //client.BeginConnect(ipe, BeginConnectCallback, client);
             }
+        } catch (Exception ex) {
+            UILog.log.Add("Exception:" + ex.ToString());
+
         }
     }
 
@@ -122,22 +162,30 @@ public class NetManager {
             Socket socket = (Socket)ar.AsyncState;
             int count = socket.EndReceive(ar);
             if (count <= 0) {  // 已断开
-                //UILog.log.Add("与服务器断开" );
+                UILog.log.Add("与服务器断开" );
                 Close();
                 return;
             }
             //UILog.log.Add("接收长度："+ count);
-            //UILog.log.Add("接收："+Encoding.UTF8.GetString(readbuff));
+            UILog.log.Add("接收："+Encoding.UTF8.GetString(readbuff.bytes));
             readbuff.writeIdx += count;
             OnReceiveData();
             readbuff.MoveBytes();
             if (!isReceive) return;
             socket.BeginReceive(readbuff.bytes, readbuff.writeIdx, readbuff.remain, 0, BeginReceiveCallback, socket);
         } catch (SocketException ex) {
-            UILog.log.Add(ex.ToString());
-            Close();
+            UILog.log.Add("SocketException:" + ex.ToString());
+            UILog.log.Add("SocketException.NativeErrorCode:" + ex.NativeErrorCode);
+
+            // 重连
+            //10061已经找到对方但是被对方拒绝
+            if (ex.NativeErrorCode.Equals(10061) || ex.NativeErrorCode.Equals(10054)) {
+                UILog.log.Add("申请重连。。。");
+                Connect(ipe.Address.ToString(), ipe.Port);
+                //client.BeginConnect(ipe, BeginConnectCallback, client);
+            }
         } catch (Exception ex) {
-            UILog.log.Add(ex.ToString());
+            UILog.log.Add("Exception:" + ex.ToString());
             Close();
         }
     }
@@ -151,7 +199,18 @@ public class NetManager {
             lock (sendMgrQueue) {
                 sendMgrQueue.Dequeue();
             }
+            SendMsg();
 
+        } catch (SocketException ex) {
+            UILog.log.Add("SocketException:" + ex.ToString());
+            UILog.log.Add("SocketException.NativeErrorCode:" + ex.NativeErrorCode);
+            // 重连
+            //10061已经找到对方但是被对方拒绝
+            if (ex.NativeErrorCode.Equals(10061) || ex.NativeErrorCode.Equals(10054)) {
+                UILog.log.Add("申请重连。。。");
+                Connect(ipe.Address.ToString(), ipe.Port);
+                //client.BeginConnect(ipe, BeginConnectCallback, client);
+            }
         } catch (Exception ex) {
             //UILog.log.Add(ex.ToString());
         }
@@ -165,20 +224,25 @@ public class NetManager {
             
             string[] item = null;
             lock (NetManager.MessageQueue) {
-                item = NetManager.MessageQueue.Peek();
+                //item = NetManager.MessageQueue.Peek();
+                item = NetManager.MessageQueue.Dequeue();
+
             }
             string type = item[0];
             string msg = item[1];
             if (type == "Linked") {
                 NetEvent.SendEvent(netEventEnum.Linked, msg); // 发送事件
+                //lock (NetManager.MessageQueue) {
+                //    NetManager.MessageQueue.Dequeue();
+                //}
                 return;
             }
             UILog.log.Add("接收到的消息：" + msg);
             BaseProto date = JsonUtility.FromJson(msg, Type.GetType(type)) as BaseProto;
             NetEvent.SendEvent((netEventEnum)date.protoType, date.returnFun()); // 发送事件
-            lock (NetManager.MessageQueue) {
-                NetManager.MessageQueue.Dequeue();
-            }
+            //lock (NetManager.MessageQueue) {
+            //    NetManager.MessageQueue.Dequeue();
+            //}
             UILog.log.Add("接收到的消息类型：" + date.protoType);
         }
     }
@@ -187,15 +251,23 @@ public class NetManager {
     public static void OnReceiveData() {
         // 半包的先不处理
         if (readbuff.Length <= 2) return;
-        Int16 bodyLen = BitConverter.ToInt16(readbuff.bytes, 0);
+        byte[] bytes = readbuff.bytes;
+        Int16 bodyLen = (Int16)(bytes[1] * 255 + bytes[0]);
+        //Int16 bodyLen = BitConverter.ToInt16(readbuff.bytes, 0);
         //UILog.log.Add("收到信息长度：" + bodyLen);
-        if (readbuff.Length < 2 + bodyLen) return;
+        if (readbuff.Length < 2 + bodyLen) {
+            // todo
+            readbuff = new ByteArray();
+            return;
+        }
 
         // 处理消息
         string message = Encoding.UTF8.GetString(readbuff.bytes, 2, bodyLen);
-        readbuff.readIdx += 2 + bodyLen;
+        readbuff.readIdx += (2 + bodyLen);
         readbuff.CheckAndMoveBytes();
-        Int16 typeLen = BitConverter.ToInt16(Encoding.UTF8.GetBytes(message), 0);
+        bytes = Encoding.UTF8.GetBytes(message);
+        Int16 typeLen = (Int16)(bytes[1] * 255 + bytes[0]);
+        //Int16 typeLen = BitConverter.ToInt16(Encoding.UTF8.GetBytes(message), 0);
         string type = typeLen.ToString();
         message = message.Substring(2, message.Length - 2);
         //UILog.log.Add("收到信息类型：" + ((netEventEnum)(int.Parse(type))).ToString());
@@ -240,6 +312,10 @@ public class NetManager {
         isPing = false;
         if (pingThread != null) {
             pingThread.Abort();
+        }
+        // 关闭发送定时器
+        if (sendTimer != null) {
+            sendTimer.Dispose();
         }
 
         // 关闭套接字

@@ -2,6 +2,7 @@
 /.vscode
 /Library
 /Temp
+/Logs
 
 # IDE - VSCode
 .vscode/*

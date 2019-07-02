@@ -1,5 +1,7 @@
-﻿using System.Collections;
+﻿using Net.Proto;
+using System.Collections;
 using System.Collections.Generic;
+using ToolSet;
 using UnityEngine;
 
 public class mainPlayer : MonoBehaviour
@@ -15,7 +17,6 @@ public class mainPlayer : MonoBehaviour
     public int mh_speed = 3;  //左右移动速度
     public int r_speed = 3;  //左右旋转速度
     public float jumpHeight = 3;  // 跳跃高度
-    public static bool isFollow = true;  // 是否开启相机跟随鼠标
     public int pickupScope = 5;  // 拾取范围
     public GameObject playerBody;  // 要旋转（弯腰）的骨骼
 
@@ -26,6 +27,7 @@ public class mainPlayer : MonoBehaviour
     private float moY; // 角色抬枪旋转增加量
 
     public bool isTrigger  = true;  // 是否触发脚踩触发器
+    private bool isUpdateMove = false;  // 是否移动了
 
     // Start is called before the first frame update
     void Start() {
@@ -100,10 +102,25 @@ public class mainPlayer : MonoBehaviour
 
     }
 
+    private void FixedUpdate() {
+        if (isUpdateMove) {
+            
+            MoveProto mp = new MoveProto();
+            mp.id = NetDispose.id;
+            mp.Timestamp = Tool.GetTimestamp();
+            mp.x = (int)(transform.position.x * 10000);
+            mp.y = (int)(transform.position.y * 10000);
+            mp.z = (int)(transform.position.z * 10000);
+            isUpdateMove = false;
+            string str = JsonUtility.ToJson(mp);
+            NetManager.Instance.Send(netEventEnum.Move, str);
+        }
+    }
+
     void LateUpdate () {
         // 角色跟随鼠标上下抬头低头
         // TODO 拾取物品时动画弯腰和视角的弯腰叠加了，之后需要修改
-        if (isFollow) {
+        if (OperationManager.isFollow) {
             float mouseY = Input.GetAxis("Mouse Y");  // 获得鼠标当前位置的Y
             moY += mouseY;
             playerBody.transform.Rotate(new Vector3(moY, 0, 0), Space.Self);
@@ -118,6 +135,9 @@ public class mainPlayer : MonoBehaviour
     {
         if (animator.GetCurrentAnimatorStateInfo(0).IsName("jump")) return;
         Vector3 v3 = new Vector3(-float.Parse(handler[0]) * mh_speed * Time.deltaTime, 0, -float.Parse(handler[1]) * mv_speed * Time.deltaTime);
+        if (Vector3.Distance(transform.position, v3) > 1) {
+            isUpdateMove = true;
+        }
         transform.Translate(v3);
          
         animator.SetTrigger("walk");  // 将人物的动画改为移动状态

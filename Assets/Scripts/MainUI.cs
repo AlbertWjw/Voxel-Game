@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Net.Proto;
+using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
@@ -33,6 +34,10 @@ public class MainUI : MonoBehaviour{
         startBtn.onClick.AddListener(() => {
             if (startBtnText.text == "Loading") return;
             startBtnText.text = "Loading";
+            GameStartProto gsp = new GameStartProto();
+            gsp.id = NetDispose.id;
+            string str = JsonUtility.ToJson(gsp);
+            NetManager.Instance.Send(netEventEnum.GameStart, str);
             SceneManager.LoadScene("Game");
         });
     }
