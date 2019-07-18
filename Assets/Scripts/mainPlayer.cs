@@ -10,12 +10,15 @@ public class mainPlayer : MonoBehaviour
     public backpack playerBackpack;  // 游戏UI脚本
     public GameObject hurtParticle;  // 受到伤害出血效果
 
+    public GunController gunController;
+
     public int maxHP = 100;  // 最大hp
     public int hp = 100;  // 当前hp
 
     public int mv_speed = 3;  //前后移动速度
     public int mh_speed = 3;  //左右移动速度
     public int r_speed = 3;  //左右旋转速度
+    public int v_speed = 3;  //上下旋转速度
     public float jumpHeight = 3;  // 跳跃高度
     public int pickupScope = 5;  // 拾取范围
     public GameObject playerBody;  // 要旋转（弯腰）的骨骼
@@ -25,6 +28,9 @@ public class mainPlayer : MonoBehaviour
     private BoxCollider trigger;  // 当前物体的脚踩触发器组件
 
     private float moY; // 角色抬枪旋转增加量
+
+    private float lMoY = 0; // 开枪前的旋转
+    private float lMoX = 0; // 开枪的旋转
 
     public bool isTrigger  = true;  // 是否触发脚踩触发器
     private bool isUpdateMove = false;  // 是否移动了
@@ -39,6 +45,16 @@ public class mainPlayer : MonoBehaviour
         EventManager.AddEvent(Rotate, eventEnum.Rotate);
         EventManager.AddEvent(Jump, eventEnum.Jump);
         EventManager.AddEvent(Pickup, eventEnum.Pickup);
+        EventManager.AddEvent((handler)=>{  // 开火时后坐力
+            if(gunController.num <= 0) return;
+            if(lMoY == 0){
+                lMoY = moY;
+            }
+            moY+=Random.Range(2F,5F);
+            lMoX = Random.Range(-2f,2f);
+            transform.Rotate(0, lMoX, 0);
+
+        }, eventEnum.Fire);
     }
 
     // Update is called once per frame
@@ -100,6 +116,19 @@ public class mainPlayer : MonoBehaviour
             animator.SetBool("shoot", false);  // 将人物的动画改为射击状态
         }
 
+        // 准星归位
+        if(lMoY != 0){
+            moY = Mathf.Lerp(moY,lMoY,Time.deltaTime*10);
+        }
+        if(Mathf.Abs(lMoY - moY)<0.1f){
+            moY = lMoY;
+            lMoY = 0;
+        }
+        if(lMoX != 0){
+            transform.Rotate(0, -lMoX, 0);
+            lMoX = 0;
+        }
+
     }
 
     private void FixedUpdate() {
@@ -122,15 +151,15 @@ public class mainPlayer : MonoBehaviour
         // TODO 拾取物品时动画弯腰和视角的弯腰叠加了，之后需要修改
         if (OperationManager.isFollow) {
             float mouseY = Input.GetAxis("Mouse Y");  // 获得鼠标当前位置的Y
-            moY += mouseY;
-            playerBody.transform.Rotate(new Vector3(moY, 0, 0), Space.Self);
+            moY += mouseY* v_speed *Time.deltaTime*10;
+            playerBody.transform.localRotation = Quaternion.Euler(Mathf.Clamp(moY,-60,60), 0, 0);  // 暂定可旋转范围为-60到60
         }
     }
 
     /// <summary>
     /// 移动
     /// </summary>
-    /// <param name="handler">移动位置:0-horizontal,1-vertical</param>
+    /// <param name="handler">移动位置:0:horizontal,1:vertical</param>
     public void move(params string[] handler)
     {
         if (animator.GetCurrentAnimatorStateInfo(0).IsName("jump")) return;
@@ -183,7 +212,7 @@ public class mainPlayer : MonoBehaviour
             }
         }
 
-        if (obj && obj.name == "Sphere" && distance(obj.transform.position, transform.position) <= pickupScope)
+        if (obj && obj.name == "Sphere" && Vector3.Distance(obj.transform.position, transform.position) <= pickupScope)
         {
             animator.SetTrigger("pickup");  // 将人物的动画改为拾取状态
             Item item = new Item(obj.GetComponents<sphereController>()[0].itemId, "物品" + obj.GetComponents<sphereController>()[0].itemId, 1);//TODO 拾取到的物品的物品id
@@ -196,32 +225,19 @@ public class mainPlayer : MonoBehaviour
     }
 
     // 当进入触发器
-    void OnTriggerEnter(Collider collider) {
+    private void OnTriggerEnter(Collider collider) {
         isTrigger = true;
     }
     private void OnTriggerStay(Collider other) {
         isTrigger = true;
     }
     // 当退出触发器
-    void OnTriggerExit(Collider collider) {
+    private void OnTriggerExit(Collider collider) {
         isTrigger = false;
     }
 
-    /// <summary>
-    /// 计算两点间的直线距离
-    /// </summary>
-    /// <param name="v1">起始点</param>
-    /// <param name="v2">结束点</param>
-    /// <returns>距离</returns>
-    private double distance(Vector3 v1,Vector3 v2) {
-        double num=0;
-        num = System.Math.Sqrt((v1.x - v2.x) * (v1.x - v2.x) + (v1.z - v2.z) * (v1.z - v2.z));
-        return num;
-    }
-
     // TODO 伤害扣除
-    public void hurt(int num)
-    {
+    public void hurt(int num) {
         GameObject go = Instantiate(hurtParticle, transform.position, transform.rotation);
         StartCoroutine(DestroyEffect(go));
         hp -= num;
@@ -232,6 +248,7 @@ public class mainPlayer : MonoBehaviour
         }
     }
 
+    // todo 删除特效
     IEnumerator DestroyEffect(GameObject go) {
         yield return new WaitForSeconds(2);
         Destroy(go);

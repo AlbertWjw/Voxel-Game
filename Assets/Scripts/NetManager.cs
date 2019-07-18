@@ -15,7 +15,6 @@ using UnityEngine;
 public class NetManager {
 
     public static NetManager Instance = new NetManager();  // 单例
-
     public static Socket client = null;  // 连接套接字
     public static IPEndPoint ipe;   // 服务器ip
     public int pingPongTime = 30;  //心跳间隔(秒)
@@ -27,7 +26,6 @@ public class NetManager {
     private static ByteArray readbuff = new ByteArray();  // 接收缓冲区
     private bool isPing = false;  // 是否开启心跳
     private static Queue<string> sendMgrQueue = new Queue<string>();  // 发送消息队列
-
     public static Queue<string[]> MessageQueue { get; set; } = new Queue<string[]>();
 
     /// <summary>
