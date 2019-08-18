@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Config : MonoBehaviour
+public class GameConfig : MonoBehaviour
 {
-    public static Config Instance = new Config();  // 单例
+    public static GameConfig Instance = new GameConfig();  // 单例
 
     public string localInfoPath = Application.dataPath +"/GameInfo";  // 本地存档文件夹路径
     public string[] localInfoFiles = {

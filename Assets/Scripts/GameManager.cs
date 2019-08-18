@@ -1,4 +1,6 @@
-﻿using Net.Proto;
+﻿using Config;
+using Net.Proto;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using ToolSet;
@@ -14,6 +16,10 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
+        ConfigManager<Gun> cm = new ConfigManager<Gun>();
+        Gun gun = cm.GetConfig(2);
+        print(gun.ID + " - " + gun.Name);
+
         PlayerParent = GameObject.Find("PlayerList").transform;
         NetEvent.AddEvent(list, netEventEnum.List);
         NetEvent.AddEvent(leave, netEventEnum.Leave);

@@ -16,6 +16,16 @@
 	13、Main页点击进入游戏后进入Game页，并同步进入游戏的玩家  
 	14、同步玩家列表  
 	15、同步玩家位置  
+	16、Excel表导入功能
+		Tool/CreateClassFile  创建类文件
+		Tool/ImportExcelData  导入导入数据
+		使用方式 例（Gun为对应导入的类）:
+		ConfigManager<> cm = new ConfigManager<Gun>();
+        Gun gun = cm.GetConfig(2);
+        print(gun.ID + " - " + gun.Name);
+		Excel表规范：
+		第一至四行依次为：字段名、字段数据类型、前后端标记、注释
+		第一列必须为ID
 
 
 ## 未完成  

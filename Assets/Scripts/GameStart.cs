@@ -14,17 +14,17 @@ public class GameStart : MonoBehaviour
     void Start() {
         stateTextUI = GameObject.Find("StateText").GetComponent<Text>();
         // 检查存档
-        if (Directory.Exists(Config.Instance.localInfoPath)) {
-            if (Directory.GetFiles(Config.Instance.localInfoPath).Length > 0) {
+        if (Directory.Exists(GameConfig.Instance.localInfoPath)) {
+            if (Directory.GetFiles(GameConfig.Instance.localInfoPath).Length > 0) {
                 stateTextUI.text = "加载配置中......";
-                LoadWithPLayerInfo(Config.Instance.localInfoPath);
+                LoadWithPLayerInfo(GameConfig.Instance.localInfoPath);
             }
         }
 
         // 检查更新
         if (isHotUpdate) {
             string[] lastVersion = GetLastVersion().Split(',');
-            int[] versionNumber = Config.Instance.localVersionNumber;
+            int[] versionNumber = GameConfig.Instance.localVersionNumber;
             if (int.Parse(lastVersion[0]) > versionNumber[0] || int.Parse(lastVersion[1]) > versionNumber[1]) {
                 print("请更新客户端");
                 stateTextUI.text = "请更新客户端";
@@ -45,7 +45,7 @@ public class GameStart : MonoBehaviour
     /// 获取最新版本号
     /// </summary>
     public string GetLastVersion() {
-        UnityWebRequest lastVersionRequest = UnityWebRequest.Get(Config.Instance.versionServerPath);
+        UnityWebRequest lastVersionRequest = UnityWebRequest.Get(GameConfig.Instance.versionServerPath);
         if (lastVersionRequest.isHttpError || lastVersionRequest.isNetworkError) {
             Debug.Log(lastVersionRequest.error);
         }
@@ -61,13 +61,13 @@ public class GameStart : MonoBehaviour
     /// </summary>
     /// <param name="path"></param>
     public void LoadWithPLayerInfo(string path) {
-        foreach (string fileName in Config.Instance.localInfoFiles) {
+        foreach (string fileName in GameConfig.Instance.localInfoFiles) {
             print(fileName);
             if (File.Exists(path + "/" + fileName)) {
                 string str = File.ReadAllText(path + "/" + fileName);
                 switch (fileName) {
                     case "UserData.cfg":
-                        Config.Instance.defaultUserName = str;
+                        GameConfig.Instance.defaultUserName = str;
                         break;
                     case "Version.cfg":
                         string[] ver = str.Split(',');
@@ -75,7 +75,7 @@ public class GameStart : MonoBehaviour
                         for (int i = 0; i < 3; i++) {
                             verInt[i] = int.Parse(ver[i]);
                         }
-                        Config.Instance.localVersionNumber = verInt;
+                        GameConfig.Instance.localVersionNumber = verInt;
                         break;
                     default:
                         break;
